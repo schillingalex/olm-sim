@@ -2,7 +2,7 @@ from copy import copy
 import solara
 import matplotlib.pyplot as plt
 
-from learner.bkt import BKTModel
+from mastery.bkt import BKTModel
 
 
 plt.style.use("seaborn-v0_8-pastel")
