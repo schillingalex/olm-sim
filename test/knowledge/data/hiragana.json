@@ -1,0 +1,99 @@
+[
+  {
+    "type": "KnowledgeItem",
+    "identifier": "hiragana",
+    "name": "Hiragana",
+    "children": [
+      {
+        "type": "KnowledgeItem",
+        "identifier": "hiragana_row_a",
+        "name": "Hiragana a-row",
+        "children": [
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_a",
+            "name": "Hiragana a",
+            "kana": "あ",
+            "romaji": "a"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_i",
+            "name": "Hiragana i",
+            "kana": "い",
+            "romaji": "i"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_u",
+            "name": "Hiragana u",
+            "kana": "う",
+            "romaji": "u"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_e",
+            "name": "Hiragana e",
+            "kana": "え",
+            "romaji": "e"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_o",
+            "name": "Hiragana o",
+            "kana": "お",
+            "romaji": "o"
+          }
+        ]
+      },
+      {
+        "type": "KnowledgeItem",
+        "identifier": "hiragana_row_ka",
+        "name": "Hiragana ka-row",
+        "children": [
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_ka",
+            "name": "Hiragana ka",
+            "kana": "か",
+            "romaji": "ka"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_ki",
+            "name": "Hiragana ki",
+            "kana": "き",
+            "romaji": "ki"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_ku",
+            "name": "Hiragana ku",
+            "kana": "く",
+            "romaji": "ku"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_ke",
+            "name": "Hiragana ke",
+            "kana": "け",
+            "romaji": "ke"
+          },
+          {
+            "type": "KanaItem",
+            "identifier": "hiragana_ko",
+            "name": "Hiragana ko",
+            "kana": "こ",
+            "romaji": "ko"
+          }
+        ],
+        "prerequesites": [
+          {
+            "item": "hiragana_row_a",
+            "mastery": 0.5
+          }
+        ]
+      }
+    ]
+  }
+]

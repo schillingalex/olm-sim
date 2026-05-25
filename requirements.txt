@@ -1,3 +1,4 @@
 matplotlib==3.10.7
 numpy==2.3.5
+pytest==9.0.3
 solara==1.54.0
