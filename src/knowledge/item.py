@@ -20,10 +20,10 @@ class KnowledgeItem:
             c.extend(child.all_children(include_self=True))
         return c
 
-    def all_leaf_children(self) -> list["KnowledgeItem"]:
+    def leaf_children(self) -> list["KnowledgeItem"]:
         c = [self] if self.is_leaf() else []
         for child in self.children:
-            c.extend(child.all_leaf_children())
+            c.extend(child.leaf_children())
         return c
 
     @staticmethod

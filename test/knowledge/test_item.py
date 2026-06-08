@@ -26,3 +26,6 @@ def example_item() -> KnowledgeItem:
 class TestKnowledgeItem:
     def test_all_children(self, example_item):
         assert len(example_item.all_children()) == 13
+
+    def test_leaf_children(self, example_item):
+        assert len(example_item.leaf_children()) == 10
