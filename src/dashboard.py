@@ -1,97 +1,113 @@
-from copy import copy
-import solara
-import matplotlib.pyplot as plt
+from dash import Dash, html, dcc, Input, Output, ctx
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
 
 from mastery.bkt import BKTModel
 
 
-plt.style.use("seaborn-v0_8-pastel")
+app = Dash(__name__, title="Learner Model Simulation", external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+model = BKTModel()
+
+def create_figure():
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=list(range(len(model.p_history))),
+            y=model.p_history,
+            mode="lines+markers",
+            name="Mastery"
+        )
+    )
+
+    fig.update_layout(
+        title="Mastery over time",
+        xaxis_title="Step",
+        yaxis_title="P(known)",
+        yaxis_range=[0, 1],
+        template="plotly_white",
+        height=400,
+    )
+
+    return fig
 
 
-models = []
+@app.callback(
+    Output("mastery-text", "children"),
+    Output("mastery-graph", "figure"),
+
+    Input("correct-btn", "n_clicks"),
+    Input("incorrect-btn", "n_clicks"),
+    Input("reset-btn", "n_clicks"),
+
+    Input("p-init-slider", "value"),
+    Input("t-slider", "value"),
+    Input("g-slider", "value"),
+    Input("s-slider", "value"),
+
+    prevent_initial_call=False,
+)
+def update_dashboard(n_correct, n_incorrect, n_reset, p_init, T, G, S):
+    model.p_init = p_init
+    model.T = T
+    model.G = G
+    model.S = S
+
+    trigger = ctx.triggered_id
+
+    if trigger == "correct-btn":
+        model.observe(True)
+    elif trigger == "incorrect-btn":
+        model.observe(False)
+    elif trigger == "reset-btn":
+        model.reset()
+
+    mastery_text = html.H4(f"Current mastery: {model.p:.3f} (expected correct = {model.expected_correct():.2f})")
+
+    fig = create_figure()
+
+    return mastery_text, fig
 
 
-def process_response(correct: bool):
-    for model in models:
-        current_model = model.value
-        current_model.observe(correct)
-        model.set(copy(current_model))
+if __name__ == "__main__":
+    app.layout = dbc.Container([
+        html.H1("Learner Model Simulation"),
 
+        dbc.Card([
+            dbc.CardHeader("Simulate Learner Event"),
+            dbc.CardBody([
+                dbc.Button("Correct", id="correct-btn", color="success", className="me-2"),
+                dbc.Button("Incorrect", id="incorrect-btn", color="danger", className="me-2"),
+                dbc.Button("Reset", id="reset-btn", color="secondary"),
+            ])
+        ], className="mb-4"),
 
-def reset_models():
-    for model in models:
-        current_model = model.value
-        current_model.reset()
-        model.set(copy(current_model))
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Bayesian Knowledge Tracing"),
 
+                    dbc.CardBody([
+                        html.Div(id="mastery-text"),
 
-@solara.component
-def Controls():
-    with solara.Card("Simulate Learner Event"):
-        with solara.Row():
-            solara.Button("Correct", on_click=lambda: process_response(True))
-            solara.Button("Incorrect", on_click=lambda: process_response(False))
-            solara.Button("Reset", on_click=lambda: reset_models())
+                        html.Label("Initial mastery"),
+                        dcc.Slider(id="p-init-slider", min=0, max=1, step=0.01, value=model.p_init),
 
+                        html.Label("Learning (T)"),
+                        dcc.Slider(id="t-slider", min=0, max=1, step=0.01, value=model.T),
 
-@solara.component
-def BKTParameterControls(model_reactive):
-    model = model_reactive.value
-    p_init = solara.reactive(model.p_init)
-    T = solara.reactive(model.T)
-    G = solara.reactive(model.G)
-    S = solara.reactive(model.S)
+                        html.Label("Guess (G)"),
+                        dcc.Slider(id="g-slider", min=0, max=1, step=0.01, value=model.G),
 
-    def apply_params(_=None):
-        model.p_init = float(p_init.value)
-        model.p_trans = float(T.value)
-        model.p_guess = float(G.value)
-        model.p_slip = float(S.value)
-        model_reactive.set(model)
+                        html.Label("Slip (S)"),
+                        dcc.Slider(id="s-slider", min=0, max=1, step=0.01, value=model.S),
 
-    with solara.Card("BKT Parameters"):
-        solara.SliderFloat(value=p_init, max=1.0, step=0.01, label="Initial mastery", on_value=apply_params)
-        solara.SliderFloat(value=T, max=1.0, step=0.01, label="Learning (T)", on_value=apply_params)
-        solara.SliderFloat(value=G, max=1.0, step=0.01, label="Guess (G)", on_value=apply_params)
-        solara.SliderFloat(value=S, max=1.0, step=0.01, label="Slip (S)", on_value=apply_params)
+                        dcc.Graph(id="mastery-graph", figure=create_figure()),
+                    ])
+                ])
+            ])
+        ])
+    ], fluid=True)
 
-
-@solara.component
-def BKTMasteryText(model_reactive):
-    model = model_reactive.value
-    return solara.Markdown(f"### Current mastery: **{model.p:.3f}** (expected correct = {model.expected_correct():.2f})")
-
-
-@solara.component
-def BKTMasteryPlot(model_reactive):
-    model = model_reactive.value
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(model.p_history, marker="o")
-    ax.set_ylim(0, 1)
-    ax.set_title("Mastery over time")
-    ax.set_xlabel("Step")
-    ax.set_ylabel("P(known)")
-    ax.grid(True)
-    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
-    fig.tight_layout()
-    plt.close(fig)
-    return solara.FigureMatplotlib(fig)
-
-
-@solara.component
-def BKTPanel():
-    bkt_model = solara.reactive(BKTModel())
-    models.append(bkt_model)
-    with solara.Card("Bayesian Knowledge Tracing"):
-        BKTParameterControls(bkt_model)
-        BKTMasteryText(bkt_model)
-        BKTMasteryPlot(bkt_model)
-
-
-@solara.component
-def Page():
-    solara.Title("Learner Model Simulation")
-    with solara.Card(elevation=0):
-        Controls()
-        with solara.Row():
-            BKTPanel()
+    app.run(debug=True)

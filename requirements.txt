@@ -1,4 +1,5 @@
-matplotlib==3.10.7
+dash==4.1.0
+dash-bootstrap-components==2.0.4
 numpy==2.3.5
+plotly==6.7.0
 pytest==9.0.3
-solara==1.54.0
